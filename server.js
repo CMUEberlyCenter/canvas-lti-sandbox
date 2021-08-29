@@ -28,7 +28,7 @@ class GalleryLTIService {
 
     http.createServer(function (req, res) {      
       serve(req, res, finalhandler(req, res));
-    }).listen(8880);
+    }).listen(8086);
   }
 }
 

@@ -23,7 +23,7 @@ export default class CanvasDrydock extends Component {
   constructor(props) {
     super(props);
 
-    this.state={
+    this.state = {
       nonce: this.uuidv4(),
       ltiFirstname: "",
       ltiLastname: "",
@@ -31,19 +31,21 @@ export default class CanvasDrydock extends Component {
       ltiTitle: "Eberly Canvas LTI Simulator",
       ltiKey: this.uuidv4(),
       ltiSecret: this.uuidv4(),
-      ltiURL: "http://localhost:8087",
+      ltiURL: "",
       ltiCartridge: "",
-      ltiActivityID: this.uuidv4()
+      ltiActivityID: this.uuidv4(),
+      ltiRole: "student",
+      statusMessage: "Sanbox ready"
     };
 
     this.cartridge=null
 
     this.activityGUID="";
-    this.role="instructor";
 
     this.onLaunch=this.onLaunch.bind(this);
     this.onNonce=this.onNonce.bind(this);
     this.onActivityID=this.onActivityID.bind(this);
+    this.onCustomFields=this.onCustomFields.bind(this);
 
 
     this.handleSecretChange=this.handleSecretChange.bind(this);
@@ -52,6 +54,15 @@ export default class CanvasDrydock extends Component {
     this.handleActivityChange=this.handleActivityChange.bind(this);
     this.handleURLChange=this.handleURLChange.bind(this);
     this.handleCartridgeChange=this.handleCartridgeChange.bind(this);
+
+    this.onChangeRoleValue = this.onChangeRoleValue.bind(this);
+  }
+ 
+  /**
+   * 
+   */
+  setStatus (aMessage) {
+    this.setState ({statusMessage: aMessage});
   }
 
   /**
@@ -81,8 +92,47 @@ export default class CanvasDrydock extends Component {
   /**
    *
    */
+  validateData () {
+    console.log ("validateData ()");
+
+    this.setStatus ("");
+
+    if (this.state.ltiURL=="") {
+      alert ("Please provide either a launch URL or a cartridge containing a url");
+      return (false);
+    }
+
+    if (this.state.ltiURL.indexOf ("https://")==-1) {
+      this.setStatus ("A url that uses http instead of https might not work in certain browsers");
+    }
+
+    if (this.state.firstName=="") {
+      alert ("Please provide a first name");
+      return (false);
+    }
+
+    if (this.state.lastName=="") {
+      alert ("Please provide a last name");
+      return (false);
+    }
+
+    if (this.state.email=="") {
+      alert ("Please provide an andrew id or email");
+      return (false);
+    }
+
+    return (true);
+  }
+
+  /**
+   *
+   */
   loadLTIPage () {
     console.log ("loadLTIPage ()");
+
+    if (this.validateData ()==false) {
+      return;
+    }
 
     var now=Date.now();
 
@@ -91,12 +141,10 @@ export default class CanvasDrydock extends Component {
     console.log ("Signature: " + signature);
 
     var roleString="urn:lti:instrole:ims/lis/Student";
-
-    /*
-    if (this.isInstructor==true) {
+    
+    if (this.state.ltiRole=="instructor") {
       roleString="urn:lti:instrole:ims/lis/Instructor";
     }
-    */
 
     $("input[type='hidden']").remove();
 
@@ -107,7 +155,7 @@ export default class CanvasDrydock extends Component {
       oauth_nonce: this.state.nonce,
       oauth_version: "1.0",
       context_id: this.state.ltiActivityID,
-      context_label: "OLILTI",
+      context_label: "EBERLYLTI",
       context_title: this.state.activityTitle,
       ext_ims_lis_basic_outcome_url: "javascript:window.parentgradePassbackReceiver",
       ext_lti_assignment_id: this.state.ltiActivityID,
@@ -129,10 +177,10 @@ export default class CanvasDrydock extends Component {
       resource_link_id: this.state.ltiActivityID,
       resource_link_title: this.state.ltiTitle,
       roles: roleString,
-      tool_consumer_info_product_family_code: "oli",
+      tool_consumer_info_product_family_code: "eberly",
       tool_consumer_info_version: "cloud",
-      tool_consumer_instance_contact_email: "simon@oli.cmu.edu",
-      tool_consumer_instance_guid: (this.uuidv4()+":oli-lms"),
+      tool_consumer_instance_contact_email: "eberly-assist@andrew.cmu.edu",
+      tool_consumer_instance_guid: (this.uuidv4()+":canvas-lms"),
       tool_consumer_instance_name: "Carnegie Mellon University",
       user_id: this.state.email,
       oauth_signature: signature,
@@ -170,28 +218,34 @@ export default class CanvasDrydock extends Component {
     if (this.state.ltiURL.length==0) {
       console.log ("No URL provided, attempting to load cartridge ...");
         
-        let doc=this.xmlParser.parseXML (this.state.ltiCartridge);
-        let children=this.xmlParser.getElementChildren (data);
-        let url="";
-        let title="";
+      if (this.state.ltiCartridge=="")  {
+        alert ("Please provide either a launch url or an LTI cartridge");
+        return;
+      }
 
-        for (let i=0;i<children.length;i++) {
-          
-          if (this.xmlParser.getElementName (children [i])=="blti:launch_url") {
-            url=this.xmlParser.getNodeTextValue (children [i]);
-          }
 
-          if (this.xmlParser.getElementName (children [i])=="blti:title") {
-            title=this.xmlParser.getNodeTextValue (children [i]);
-          }          
+      let doc=this.xmlParser.parseXML (this.state.ltiCartridge);
+      let children=this.xmlParser.getElementChildren (data);
+      let url="";
+      let title="";
+
+      for (let i=0;i<children.length;i++) {
+        
+        if (this.xmlParser.getElementName (children [i])=="blti:launch_url") {
+          url=this.xmlParser.getNodeTextValue (children [i]);
         }
 
-        this.setState ({
-          ltiTitle: title,
-          ltiURL: url
-        },(e) => {
-          this.loadLTIPage ();  
-        });
+        if (this.xmlParser.getElementName (children [i])=="blti:title") {
+          title=this.xmlParser.getNodeTextValue (children [i]);
+        }          
+      }
+
+      this.setState ({
+        ltiTitle: title,
+        ltiURL: url
+      },(e) => {
+        this.loadLTIPage ();  
+      });
     } else {    
       console.log ("URL provided, skipping cartridge configuration: " + this.state.ltiURL);
 
@@ -272,15 +326,34 @@ export default class CanvasDrydock extends Component {
   /**
    *
    */
+  onChangeRoleValue(event) {
+    console.log("onChangeRoleValue (" + event.target.value + ")");
+
+    this.setState ({
+      ltiRole: event.target.value
+    });
+  }
+
+  /**
+   *
+   */
+  onCustomFields () {
+    console.log ("onCustomFields ()");
+
+  }
+
+  /**
+   *
+   */
   render() {
      return (
         <div className="maincontainer">
           <div className="canvasmenu"><img src={canvasMockMenu} /></div>     
-          <div className="canvasbanner">Eberly Canvas LTI Simulator</div>		  
+          <div className="canvasbanner"><a href="https://cmu.edu/teaching" className="eberlyurl">Eberly Canvas LTI Simulator</a></div>
     		  <div className="verticalcontainer">
     		    <div className="controls">
               
-              <div className="controlpanel borderRight">
+              <div className="controlpanel borderRight" style={{minWidth: "281px", flex: "0"}}>
                 <div className="row">
                   <label htmlFor="first">First Name:</label>
                   <input className="canvas-textinput" type="text" id="first" name="first" />
@@ -295,9 +368,16 @@ export default class CanvasDrydock extends Component {
                   <label htmlFor="email">Email / Andrew ID:</label>
                   <input className="canvas-textinput" type="text" id="email" name="email" />
                 </div>
-              </div>                
 
-              <div className="controlpanel borderRight" style={{minWidth: "375px"}}>
+                <div className="row" >
+                  <input type="radio" value="student" name="role" checked={this.state.ltiRole === 'student'} onChange={this.onChangeRoleValue} /> Student
+                  <input type="radio" value="instructor" name="role" checked={this.state.ltiRole === 'instructor'} onChange={this.onChangeRoleValue} /> Instructor
+                </div>
+
+                <button className="canvas-button" onClick={this.onCustomFields}>Custom Fields</button>
+              </div>
+
+              <div className="controlpanel borderRight" style={{minWidth: "308px", flex: "0"}}>
                 <div className="row">
                   <label htmlFor="secret">Secret:</label>
                   <input className="canvas-textinput" type="text" id="secret" name="secret" value={this.state.ltiSecret} onChange={this.handleSecretChange}/><br />
@@ -321,10 +401,12 @@ export default class CanvasDrydock extends Component {
                 </div>
               </div>                
 
-              <div className="controlpanel borderRight">
+              <div className="controlpanel borderRight" style={{borderRight: "0px"}}>
                 <div className="row">
-                  <label htmlFor="url">URL:</label>
-                  <input className="canvas-textinput" type="text" id="url" name="url" value={this.state.ltiURL} onChange={this.handleURLChange} /><br />
+                  <label htmlFor="url">Launch URL:</label>
+                  <input className="canvas-textinput" type="text" id="url" name="url" value={this.state.ltiURL} onChange={this.handleURLChange} />
+                  <button className="canvas-button" onClick={this.onLaunch}>Launch</button>
+                  <br />
                 </div> 
  
                 <div className="row">
@@ -333,18 +415,14 @@ export default class CanvasDrydock extends Component {
                 </div>
               </div> 
 
-              <div className="controlpanel" style={{width: "113px",flex: 0, display: "flex", flexDirection: "column"}}>
-                <div style={{flex: 1}}></div>
-                <button className="canvas-button" onClick={this.onLaunch}>Launch</button>
-                <div style={{flex: 1}}></div>
-              </div>                
     		    </div>
     		    <div className="iframe">
     		      <iframe id="lticontent" name="lticontent" width="100%" height="100%" frameBorder="0" src=""></iframe>
               <form id="ltirelayform" target="lticontent" method="post"></form>
     		    </div>
-    		  </div>
-		  
+
+            <div id="statusbar" className="statusbar">{this.state.statusMessage}</div>
+    		  </div>		  
         </div>
      );
   }
