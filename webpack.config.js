@@ -12,6 +12,7 @@ const config = {
     publicPath: resolve('./public/')
   },
   // webpack-dev-server configuration
+  // https://github.com/webpack/webpack-dev-server/blob/master/migration-v4.md
   devServer: { 
     setup(app) {
       app.post('*', (req, res) => {
