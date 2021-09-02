@@ -31,9 +31,9 @@ export default class CanvasDrydock extends Component {
       ltiTitle: "Eberly Canvas LTI Simulator",
       ltiKey: this.uuidv4(),
       ltiSecret: this.uuidv4(),
-      ltiURL: "",
+      ltiURL: "http://localhost",
       ltiCartridge: "",
-      ltiActivityID: this.uuidv4(),
+      ltiActivityID: "Demo Activity",
       ltiRole: "student",
       statusMessage: "Sanbox ready"
     };
@@ -47,7 +47,9 @@ export default class CanvasDrydock extends Component {
     this.onActivityID=this.onActivityID.bind(this);
     this.onCustomFields=this.onCustomFields.bind(this);
 
-
+    this.onChangeFirstnameValue=this.onChangeFirstnameValue.bind(this);
+    this.onChangeLastnameValue=this.onChangeLastnameValue.bind(this);
+    this.onChangeEmailValue=this.onChangeEmailValue.bind(this);
     this.handleSecretChange=this.handleSecretChange.bind(this);
     this.handleKeyChange=this.handleKeyChange.bind(this);
     this.handleNonceChange=this.handleNonceChange.bind(this);
@@ -97,6 +99,8 @@ export default class CanvasDrydock extends Component {
 
     this.setStatus ("");
 
+    console.log (this.state);
+
     if (this.state.ltiURL=="") {
       alert ("Please provide either a launch URL or a cartridge containing a url");
       return (false);
@@ -106,17 +110,17 @@ export default class CanvasDrydock extends Component {
       this.setStatus ("A url that uses http instead of https might not work in certain browsers");
     }
 
-    if (this.state.firstName=="") {
+    if (this.state.ltiFirstname=="") {
       alert ("Please provide a first name");
       return (false);
     }
 
-    if (this.state.lastName=="") {
+    if (this.state.ltiLastname=="") {
       alert ("Please provide a last name");
       return (false);
     }
 
-    if (this.state.email=="") {
+    if (this.state.ltiEmail=="") {
       alert ("Please provide an andrew id or email");
       return (false);
     }
@@ -156,7 +160,7 @@ export default class CanvasDrydock extends Component {
       oauth_version: "1.0",
       context_id: this.state.ltiActivityID,
       context_label: "EBERLYLTI",
-      context_title: this.state.activityTitle,
+      context_title: this.state.ltiTitle,
       ext_ims_lis_basic_outcome_url: "javascript:window.parentgradePassbackReceiver",
       ext_lti_assignment_id: this.state.ltiActivityID,
       ext_outcome_data_values_accepted: "url,text",
@@ -168,9 +172,9 @@ export default class CanvasDrydock extends Component {
       launch_presentation_locale: "en",
       launch_presentation_return_url: "javascript:window.parent.launchPresentationReceiver",
       lis_outcome_service_url: "javascript:window.parent.outcomesReceiver",
-      lis_person_name_family: this.state.lastName,
-      lis_person_name_full: (this.state.firstName + " " + this.state.lastName),
-      lis_person_name_given: this.state.firstName,
+      lis_person_name_family: this.state.ltiFirstname,
+      lis_person_name_full: (this.state.ltiFirstname + " " + this.state.ltiLastname),
+      lis_person_name_given: this.state.ltiFirstname,
       lti_message_type: "basic-lti-launch-request",
       lti_version: "LTI-1p0",
       oauth_callback: "about:blank",
@@ -182,7 +186,7 @@ export default class CanvasDrydock extends Component {
       tool_consumer_instance_contact_email: "eberly-assist@andrew.cmu.edu",
       tool_consumer_instance_guid: (this.uuidv4()+":canvas-lms"),
       tool_consumer_instance_name: "Carnegie Mellon University",
-      user_id: this.state.email,
+      user_id: this.state.ltiEmail,
       oauth_signature: signature,
       custom_canvas_assignment_title: this.state.ltiTitle
     };
@@ -205,8 +209,6 @@ export default class CanvasDrydock extends Component {
     $("#ltirelayform").attr("action",this.state.ltiURL);
 
     document.getElementById('ltirelayform').submit();
-
-    ltirelayform
   }  
 
   /**
@@ -326,6 +328,27 @@ export default class CanvasDrydock extends Component {
   /**
    *
    */
+  onChangeFirstnameValue(event) {
+    this.setState({ltiFirstname: event.target.value});
+  }
+
+  /**
+   *
+   */
+  onChangeLastnameValue(event) {
+    this.setState({ltiLastname: event.target.value});
+  }
+
+  /**
+   *
+   */
+  onChangeEmailValue(event) {
+    this.setState({ltiEmail: event.target.value});
+  }    
+
+  /**
+   *
+   */
   onChangeRoleValue(event) {
     console.log("onChangeRoleValue (" + event.target.value + ")");
 
@@ -356,17 +379,17 @@ export default class CanvasDrydock extends Component {
               <div className="controlpanel borderRight" style={{minWidth: "281px", flex: "0"}}>
                 <div className="row">
                   <label htmlFor="first">First Name:</label>
-                  <input className="canvas-textinput" type="text" id="first" name="first" />
+                  <input className="canvas-textinput" type="text" id="first" name="first" onChange={this.onChangeFirstnameValue} />
                 </div>
 
                 <div className="row">
                   <label htmlFor="last">Last Name:</label>
-                  <input className="canvas-textinput" type="text" id="last" name="last" />
+                  <input className="canvas-textinput" type="text" id="last" name="last" onChange={this.onChangeLastnameValue} />
                 </div>
 
                 <div className="row">
                   <label htmlFor="email">Email / Andrew ID:</label>
-                  <input className="canvas-textinput" type="text" id="email" name="email" />
+                  <input className="canvas-textinput" type="text" id="email" name="email" onChange={this.onChangeEmailValue} />
                 </div>
 
                 <div className="row" >
