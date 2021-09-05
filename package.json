@@ -5,14 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack -p --progress --config webpack.config.js",
+    "build": "webpack --mode production --progress --config webpack.config.js",
     "dev-build": "webpack --progress -d --config webpack.config.js",
     "watch": "webpack --progress -d --config webpack.config.js --watch",
-    "start": "webpack-dev-server --mode development --progress --config webpack.config.js --host 0.0.0.0 --port 8086"
+    "start": "webpack-dev-server --mode development --progress --host 127.0.0.1 --port 8086"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mindtoeye/Gallery2.git"
+    "url": "git+https://github.com/CMUEberlyCenter/canvas-lti-sandbox"
   },
   "keywords": [
     "canvas",
@@ -39,15 +39,14 @@
     "html-webpack-plugin": "^3.2.0",
     "is-hotkey": "^0.1.6",
     "lodash": "^4.17.20",
-    "pdfkit": "^0.10.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-json-tree": "^0.11.2",
     "slate": "^0.47.9",
     "slate-react": "^0.22.9",
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^4.1.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
@@ -59,9 +58,7 @@
     "css-loader": "^3.6.0",
     "history": "^4.10.1",
     "html-webpack-plugin": "^3.2.0",
-    "html2pdf.js": "^0.9.2",
-    "immutable": "^4.0.0-rc.12",
-    "jquery": "^3.5.1",
+    "immutable": "^3.8.1",
     "oauth-signature": "^1.5.0",
     "raw-loader": "^3.1.0",
     "react-ace": "^7.0.4",
@@ -76,8 +73,6 @@
     "slate-editor": "^5.1.1",
     "string-replace-webpack-plugin": "^0.1.3",
     "style-loader": "^1.3.0",
-    "transform-loader": "^0.2.4",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "transform-loader": "^0.2.4"
   }
 }
