@@ -2,10 +2,17 @@
 
 var finalhandler = require('finalhandler');
 var serveStatic = require('serve-static');
+var dotenv = require('dotenv');
 var fs = require('fs');
 var http = require('http');
 
-var serve = serveStatic("./public/", { 'index': ['index.html', 'index.htm'] });
+// https://www.npmjs.com/package/serve-static
+var serve = serveStatic("public", { 
+  'index': ['index.html', 'index.htm'],
+  'dotfiles': 'deny'
+});
+
+dotenv.config ();
 
 /**
  *
@@ -17,6 +24,9 @@ class EberlyCanvasLTISandbox {
    */
   constructor () {
     console.log ("constructor ()");
+
+    this.bindPort=8086;
+    this.bindAddress="127.0.0.1";
   }
  
   /**
@@ -25,10 +35,18 @@ class EberlyCanvasLTISandbox {
   run () {
     console.log ("run ()");
 
+    const bAddr=process.env.ADDRESS;
+
+    if (bAddr) {
+      this.bindAddress=bAddr;
+    }
+
+    console.log ("Starting server at: " + this.bindAddress + ":" + this.bindPort);
+
     http.createServer(function (req, res) {
       console.log ("Processing request ...");
       serve(req, res, finalhandler(req, res));
-    }).listen(8086, '127.0.0.1');
+    }).listen(this.bindPort, this.bindAddress);
   }
 }
 

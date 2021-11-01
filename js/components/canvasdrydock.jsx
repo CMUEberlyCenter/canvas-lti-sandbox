@@ -172,7 +172,7 @@ export default class CanvasDrydock extends Component {
       launch_presentation_locale: "en",
       launch_presentation_return_url: "javascript:window.parent.launchPresentationReceiver",
       lis_outcome_service_url: "javascript:window.parent.outcomesReceiver",
-      lis_person_name_family: this.state.ltiFirstname,
+      lis_person_name_family: this.state.ltiLastname,
       lis_person_name_full: (this.state.ltiFirstname + " " + this.state.ltiLastname),
       lis_person_name_given: this.state.ltiFirstname,
       lti_message_type: "basic-lti-launch-request",

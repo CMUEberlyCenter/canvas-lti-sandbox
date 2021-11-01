@@ -1,3 +1,4 @@
 clear
 cat banner.txt
-npm run start
+#npm run start
+node server.js
